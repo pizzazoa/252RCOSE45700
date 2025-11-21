@@ -32,9 +32,8 @@ export function createUser(username, passwordHash, defaultDeck, defaultCards) {
   const newUser = {
     id: uuidv4(),
     username,
-    passwordHash,
-    deck: defaultDeck,
-    cards: defaultCards
+    passwordHash
+    // deck과 cards는 별도 store에서 관리
   };
   db.data.users.push(newUser);
   db.write();
@@ -47,8 +46,7 @@ export function updateUserDeck(userId, deck) {
   db.read();
   const user = db.data.users.find(u => u.id === userId);
   if (!user) return null;
-  user.deck = deck;
-  db.write();
+  // users.json에는 저장하지 않고 deck store에만 저장
   deckStoreSet(userId, deck);
   return user;
 }
@@ -58,11 +56,17 @@ export function getUserDeck(userId) {
   if (deck && deck.length)
     return deck;
 
+  // 마이그레이션: 기존 users.json에 deck이 있으면 새 store로 복사
   db.read();
   const user = db.data.users.find(u => u.id === userId);
   if (user && user.deck) {
-    deckStoreSet(userId, user.deck);
-    return user.deck;
+    console.log(`[Migration] Moving deck from users.json to userDecks.json for user ${userId}`);
+    const userDeck = user.deck;
+    deckStoreSet(userId, userDeck);
+    // users.json에서 제거 (마이그레이션 완료)
+    delete user.deck;
+    db.write();
+    return userDeck;
   }
   return null;
 }
@@ -72,11 +76,17 @@ export function getUserCards(userId) {
   if (cards && cards.length)
     return cards;
 
+  // 마이그레이션: 기존 users.json에 cards가 있으면 새 store로 복사
   db.read();
   const user = db.data.users.find(u => u.id === userId);
   if (user && user.cards) {
-    cardStoreSet(userId, user.cards);
-    return user.cards;
+    console.log(`[Migration] Moving cards from users.json to userCards.json for user ${userId}`);
+    const userCards = user.cards;
+    cardStoreSet(userId, userCards);
+    // users.json에서 제거 (마이그레이션 완료)
+    delete user.cards;
+    db.write();
+    return userCards;
   }
 
   return [];

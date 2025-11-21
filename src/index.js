@@ -851,8 +851,8 @@ function getDefaultCardCollection() {
   return [
     { id: 'Slash', copies: 6 },
     { id: 'Arrow', copies: 6 },
-    { id: 'Heal', copies: 4 },
-    { id: 'Fireball', copies: 4 }
+    { id: 'Heal', copies: 6 },
+    { id: 'Fireball', copies: 6 }
   ];
 }
 
