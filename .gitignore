@@ -6,3 +6,6 @@ data/
 
 # 3. 환경 변수 (비밀 키)
 .env
+
+.DS_Store
+src/.DS_Store
